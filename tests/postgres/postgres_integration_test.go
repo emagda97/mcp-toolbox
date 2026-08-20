@@ -28,6 +28,8 @@ import (
 	"github.com/googleapis/mcp-toolbox/internal/testutils"
 	"github.com/googleapis/mcp-toolbox/tests"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/wait"
 )
 
 var (
@@ -82,9 +84,69 @@ func initPostgresConnectionPool(host, port, user, pass, dbname string) (*pgxpool
 }
 
 func TestPostgres(t *testing.T) {
-	sourceConfig := getPostgresVars(t)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
+
+	user := os.Getenv("POSTGRES_USER")
+	if user == "" {
+		user = "postgres"
+	}
+	pass := os.Getenv("POSTGRES_PASS")
+	if pass == "" {
+		pass = "password"
+	}
+	db := os.Getenv("POSTGRES_DATABASE")
+	if db == "" {
+		db = "test_database"
+	}
+
+	req := testcontainers.ContainerRequest{
+		Image:        "pgvector/pgvector:pg16",
+		Cmd:          []string{"postgres", "-c", "shared_preload_libraries=pg_stat_statements"},
+		ExposedPorts: []string{"5432/tcp"},
+		Env: map[string]string{
+			"POSTGRES_USER":     user,
+			"POSTGRES_PASSWORD": pass,
+			"POSTGRES_DB":       db,
+		},
+		WaitingFor: wait.ForAll(
+			wait.ForLog("database system is ready to accept connections").WithOccurrence(2),
+			wait.ForExposedPort(),
+		),
+	}
+
+	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
+		ContainerRequest: req,
+		Started:          true,
+	})
+	if err != nil {
+		t.Fatalf("failed to start postgres container: %s", err)
+	}
+
+	t.Cleanup(func() {
+		cleanupCtx, cleanupCancel := context.WithTimeout(context.Background(), 60*time.Second)
+		defer cleanupCancel()
+		if err := container.Terminate(cleanupCtx); err != nil {
+			t.Fatalf("failed to terminate postgres container: %v", err)
+		}
+	})
+
+	host, err := container.Host(ctx)
+	if err != nil {
+		t.Fatalf("failed to get container host: %s", err)
+	}
+	port, err := container.MappedPort(ctx, "5432")
+	if err != nil {
+		t.Fatalf("failed to get container mapped port: %s", err)
+	}
+
+	PostgresHost = host
+	PostgresPort = port.Port()
+	PostgresUser = user
+	PostgresPass = pass
+	PostgresDatabase = db
+
+	sourceConfig := getPostgresVars(t)
 
 	args := []string{"--enable-api"}
 

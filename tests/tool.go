@@ -2152,6 +2152,9 @@ func RunPostgresListActiveQueriesTest(t *testing.T, ctx context.Context, pool *p
 	for _, tc := range invokeTcs {
 		t.Run(tc.name, func(t *testing.T) {
 			if tc.clientSleepSecs > 0 {
+				t.Cleanup(func() {
+					_, _ = pool.Exec(context.Background(), "SELECT pg_cancel_backend(pid) FROM pg_stat_activity WHERE query LIKE 'SELECT pg_sleep%' AND pid <> pg_backend_pid();")
+				})
 				wg.Add(1)
 
 				go func() {
@@ -2163,7 +2166,7 @@ func RunPostgresListActiveQueriesTest(t *testing.T, ctx context.Context, pool *p
 						return
 					}
 					_, err = pool.Exec(ctx, fmt.Sprintf("SELECT pg_sleep(%d);", tc.clientSleepSecs))
-					if err != nil {
+					if err != nil && !strings.Contains(err.Error(), "57014") && !strings.Contains(err.Error(), "canceling statement") {
 						t.Errorf("Executing 'SELECT pg_sleep' failed: %s", err)
 					}
 				}()

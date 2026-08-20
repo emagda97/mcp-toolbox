@@ -68,7 +68,7 @@ func setupAlloyDBContainer(ctx context.Context, t *testing.T) (string, string, f
 		},
 		WaitingFor: wait.ForAll(
 			wait.ForLog("database system was shut down at"),
-			wait.ForLog("database system is ready to accept connections"),
+			wait.ForLog("database system is ready to accept connections").WithOccurrence(2),
 			wait.ForExposedPort(),
 		),
 	}
@@ -82,9 +82,13 @@ func setupAlloyDBContainer(ctx context.Context, t *testing.T) (string, string, f
 	}
 
 	cleanup := func() {
-		if err := container.Terminate(ctx); err != nil {
-			t.Fatalf("failed to terminate container: %s", err)
-		}
+		t.Cleanup(func() {
+			cleanupCtx, cleanupCancel := context.WithTimeout(context.Background(), 60*time.Second)
+			defer cleanupCancel()
+			if err := container.Terminate(cleanupCtx); err != nil {
+				t.Fatalf("failed to terminate container: %s", err)
+			}
+		})
 	}
 
 	host, err := container.Host(ctx)
