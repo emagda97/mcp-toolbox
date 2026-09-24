@@ -1412,7 +1412,7 @@ steps:
         fi
 
   - id: "oracle"
-    name: ghcr.io/oracle/oraclelinux9-instantclient:23
+    name: "us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO_NAME}/ghcr.io/oracle/oraclelinux9-instantclient:23@sha256:69bdfa571da702afc5722fcefc8849ad61fb6e0c6eb33f993d0cf339e1bc8328"
     waitFor: ["install-dependencies", "detect-changes"]
     entrypoint: /bin/bash
     env:
