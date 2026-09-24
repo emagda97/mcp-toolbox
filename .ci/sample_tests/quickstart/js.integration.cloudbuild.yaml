@@ -13,7 +13,7 @@
 # limitations under the License.
 
 steps:
-  - name: 'node:22'
+  - name: 'us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO_NAME}/node:22'
     id: 'js-quickstart-test'
     entrypoint: 'bash'
     args:

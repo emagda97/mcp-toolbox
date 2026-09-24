@@ -49,7 +49,7 @@ substitutions:
   _AR_REPO_NAME: "toolbox"
   _AR_REPO_NAME: toolbox
   _TARGET_LANG: "js"
-  _IMAGE: "node:22"
+  _IMAGE: "us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO_NAME}/node:22"
   _TARGET_ROOT: "docs/en/documentation/configuration/pre-post-processing/js"
   _TABLE_NAME: "hotels_js_pre_post_processing"
   _SQL_FILE: ".ci/sample_tests/setup_hotels.sql"
