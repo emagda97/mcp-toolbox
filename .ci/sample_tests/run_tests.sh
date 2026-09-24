@@ -122,7 +122,7 @@ run_js_test() {
   echo "--- Running JS Test: $name ---"
   (
     cd "$dir"
-    if [ -f "package-lock.json" ]; then npm ci -q; else npm install -q; fi
+    if [ -f "package-lock.json" ]; then npm ci --registry=https://us-central1-npm.pkg.dev/${PROJECT_ID}/npm-remote/ -q; else npm install --registry=https://us-central1-npm.pkg.dev/${PROJECT_ID}/npm-remote/ -q; fi
     
     cd ..
     # Looking for a JS test file in the parent directory

@@ -427,7 +427,7 @@ steps:
         if grep -qE "$$PATTERN" /workspace/changed_files.txt; then
           echo "Changes detected. Running Dataform tests..."
           apt-get update && apt-get install -y npm && \
-          npm install -g @dataform/cli && \
+          npm install --registry=https://us-central1-npm.pkg.dev/${PROJECT_ID}/npm-remote/ -g @dataform/cli && \
           .ci/test_with_coverage.sh \
             "Dataform" \
             dataform \
