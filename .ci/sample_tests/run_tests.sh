@@ -33,7 +33,6 @@ install_system_packages() {
   echo "Installing system packages..."
   apt-get update && apt-get install -y \
     postgresql-client \
-    wget \
     gettext-base  \
     netcat-openbsd
     
@@ -44,7 +43,7 @@ install_system_packages() {
 
 start_cloud_sql_proxy() {
   echo "Starting Cloud SQL Proxy..."
-  wget -q "https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.10.0/cloud-sql-proxy.linux.amd64" -O /usr/local/bin/cloud-sql-proxy
+  cp ./binaries/cloud-sql-proxy /usr/local/bin/cloud-sql-proxy || { echo "ERROR: ./binaries/cloud-sql-proxy binary is missing!" >&2; exit 1; }
   chmod +x /usr/local/bin/cloud-sql-proxy
   cloud-sql-proxy "${CLOUD_SQL_INSTANCE}" > "$PROXY_LOG" 2>&1 &
   PROXY_PID=$!
@@ -63,10 +62,11 @@ start_cloud_sql_proxy() {
 }
 
 setup_toolbox() {
+
   echo "Setting up Toolbox server..."
   TOOLBOX_YAML="/tools.yaml"
   echo "${TOOLS_YAML_CONTENT}" > "$TOOLBOX_YAML"
-  wget -q "https://storage.googleapis.com/mcp-toolbox-for-databases/v${VERSION}/linux/amd64/toolbox" -O "/toolbox"
+  cp ./binaries/toolbox /toolbox || { echo "ERROR: ./binaries/toolbox binary is missing!" >&2; exit 1; }
   chmod +x "/toolbox"
   /toolbox --tools-file "$TOOLBOX_YAML" > "$TOOLBOX_LOG" 2>&1 &
   TOOLBOX_PID=$!

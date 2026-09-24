@@ -13,6 +13,17 @@
 # limitations under the License.
 
 steps:
+
+  - id: "download-dependencies"
+    name: "gcr.io/cloud-builders/gcloud:latest"
+    waitFor: ['-']
+    script: |
+        #!/usr/bin/env bash
+        set -e
+        # Pre-download dependencies for test containers
+        gcloud storage cp gs://toolbox-build-assets/compile-dependencies/go1.25.1.linux-amd64.tar.gz ./go.tar.gz
+        echo "7716a0d940a0f6ae8e1f3b3f4f36299dc53e31b16840dbd171254312c41ca12e  ./go.tar.gz" | sha256sum -c -
+
   - id: "detect-changes"
     name: "gcr.io/cloud-builders/git"
     waitFor: ["-"]
@@ -32,7 +43,6 @@ steps:
         fi
         echo "Detected changed files:"
         cat /workspace/changed_files.txt
-
 
   - id: "install-dependencies"
     name: "us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO_NAME}/golang:1@sha256:3680233e3204827fbdc66088528ae6d4b3d034f51d03a99d454f6de034888244"
@@ -1434,8 +1444,7 @@ steps:
           # Install the C compiler and Oracle SDK headers needed for cgo
           dnf install -y gcc oracle-instantclient-devel
           # Install Go
-          curl -L -o go.tar.gz "https://go.dev/dl/go1.25.1.linux-amd64.tar.gz"
-          tar -C /usr/local -xzf go.tar.gz
+          tar -C /usr/local -xzf ./go.tar.gz
           export PATH="/usr/local/go/bin:$$PATH"
 
           go test -v ./tests/oracle/... \

@@ -13,8 +13,26 @@
 # limitations under the License.
 
 steps:
+
+  - id: "download-dependencies"
+    name: "gcr.io/cloud-builders/gcloud:latest"
+    waitFor: ['-']
+    script: |
+        #!/usr/bin/env bash
+        set -e
+        # Pre-download dependencies for test containers
+        mkdir -p ./binaries
+        gcloud storage cp gs://toolbox-build-assets/compile-dependencies/cloud-sql-proxy.linux.amd64 ./binaries/cloud-sql-proxy
+        echo "1cb8f9087943b116f0be92a7291b2cd05d5fef515f8f1f0c045251bad464b022  ./binaries/cloud-sql-proxy" | sha256sum -c -
+        chmod +x ./binaries/cloud-sql-proxy
+        
+        VERSION=$(cat ./cmd/version.txt)
+        gcloud storage cp gs://mcp-toolbox-for-databases/v${VERSION}/linux/amd64/toolbox ./binaries/toolbox
+        chmod +x ./binaries/toolbox
+
   - name: 'us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO_NAME}/node:22'
     id: 'js-quickstart-test'
+    waitFor: ["download-dependencies"]
     entrypoint: 'bash'
     args:
       # The '-c' flag tells bash to execute the following string as a command.

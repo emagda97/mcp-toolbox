@@ -13,8 +13,26 @@
 # limitations under the License.
 
 steps:
+
+  - id: "download-dependencies"
+    name: "gcr.io/cloud-builders/gcloud:latest"
+    waitFor: ['-']
+    script: |
+        #!/usr/bin/env bash
+        set -e
+        # Pre-download dependencies for test containers
+        mkdir -p ./binaries
+        gcloud storage cp gs://toolbox-build-assets/compile-dependencies/cloud-sql-proxy.linux.amd64 ./binaries/cloud-sql-proxy
+        echo "1cb8f9087943b116f0be92a7291b2cd05d5fef515f8f1f0c045251bad464b022  ./binaries/cloud-sql-proxy" | sha256sum -c -
+        chmod +x ./binaries/cloud-sql-proxy
+        
+        VERSION=$(cat ./cmd/version.txt)
+        gcloud storage cp gs://mcp-toolbox-for-databases/v${VERSION}/linux/amd64/toolbox ./binaries/toolbox
+        chmod +x ./binaries/toolbox
+
   - name: "${_IMAGE}"
     id: "go-pre-post-processing-test"
+    waitFor: ["download-dependencies"]
     entrypoint: "bash"
     args:
       - -c
@@ -48,7 +66,7 @@ timeout: 1200s
 substitutions:
   _AR_REPO_NAME: toolbox
   _TARGET_LANG: "go"
-  _IMAGE: "golang:1.25.8"
+  _IMAGE: "us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO_NAME}/golang:1@sha256:3680233e3204827fbdc66088528ae6d4b3d034f51d03a99d454f6de034888244"
   _TARGET_ROOT: "docs/en/documentation/configuration/pre-post-processing/go"
   _TABLE_NAME: "hotels_go_pre_post_processing"
   _SQL_FILE: ".ci/sample_tests/setup_hotels.sql"
