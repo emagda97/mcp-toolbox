@@ -98,7 +98,7 @@ run_python_test() {
     cd "$dir"
     python3 -m venv .venv
     source .venv/bin/activate
-    pip install -q -r requirements.txt pytest
+    pip install --index-url https://us-central1-python.pkg.dev/${PROJECT_ID}/pypi-remote/simple/ -q -r requirements.txt pytest==9.1.1
     
     cd ..
     local test_file=$(find . -maxdepth 1 -name "*test.py" | head -n 1)
