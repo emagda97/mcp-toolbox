@@ -1783,6 +1783,7 @@ options:
     name: projects/$PROJECT_ID/locations/us-central1/workerPools/integration-testing # Necessary for VPC network connection
 
 substitutions:
+  _AR_REPO_NAME: toolbox
   _RUN_EXPENSIVE_TESTS: "false"
   _DATABASE_NAME: test_database
   _FIREBIRD_DATABASE_NAME: /firebird/test_database.fdb

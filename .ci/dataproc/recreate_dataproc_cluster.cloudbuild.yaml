@@ -37,6 +37,7 @@ options:
     name: projects/$PROJECT_ID/locations/us-central1/workerPools/integration-testing
 
 substitutions:
+  _AR_REPO_NAME: toolbox
   _CLUSTER_NAME: "dataproc-testing-cluster"
   _REGION: "us-central1"
   _IMAGE_VERSION: "2.3-debian12"

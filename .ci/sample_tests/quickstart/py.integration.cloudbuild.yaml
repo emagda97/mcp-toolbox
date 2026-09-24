@@ -48,5 +48,8 @@ availableSecrets:
 
 timeout: 1000s
 
+substitutions:
+  _AR_REPO_NAME: toolbox
+
 options:
   logging: CLOUD_LOGGING_ONLY

@@ -46,6 +46,8 @@ availableSecrets:
 timeout: 1200s
 
 substitutions:
+  _AR_REPO_NAME: "toolbox"
+  _AR_REPO_NAME: toolbox
   _TARGET_LANG: "python"
   _IMAGE: "gcr.io/google.com/cloudsdktool/cloud-sdk:537.0.0"
   _TARGET_ROOT: "docs/en/documentation/configuration/pre-post-processing/python"

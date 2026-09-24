@@ -240,6 +240,7 @@ timeout: 7200s
 # Everything not defined here comes from the trigger; run_evals.sh fails the
 # step when one is missing.
 substitutions:
+  _AR_REPO_NAME: toolbox
   _EVAL_HARNESSES: "claude_cli"
   # Presubmit runs override this so their rows stay out of the scheduled runs.
   _EVAL_GROUP: "mcp-toolbox"
