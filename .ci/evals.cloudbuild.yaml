@@ -20,6 +20,25 @@
 # steps inherit _EVAL_HARNESSES unless they set their own.
 
 steps:
+  - id: "secure_content_scan"
+    name: "us-central1-docker.pkg.dev/louhi-prod-1/louhi-helper/louhi-helper-v2"
+    waitFor: ["-"]
+    args:
+    - "secure_content_scan"
+    - "--allowed_prefixes"
+    - "https://python.pkg.dev/artifact-foundry-prod/"
+    - "https://maven.pkg.dev/artifact-foundry-prod/"
+    - "https://npm.pkg.dev/artifact-foundry-prod/"
+    - "https://docker.pkg.dev/artifact-foundry-prod/"
+    - "https://ziglang.org/"
+    - "https://go.dev/"
+    - "https://api.github.com/"
+    - "https://play.dgraph.io/"
+    results:
+      - name: "allowed_uri_prefix"
+        attestationContent: "allowed_uri_prefix"
+        attestationType: "https://bcid.corp.google.com/build-content-restrictions/v0.1"
+
   # Narrows a pull request run to the databases it touched. Empty on a scheduled
   # build, which run_evals.sh runs in full.
   - id: "detect-changes"
